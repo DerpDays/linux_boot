@@ -13,7 +13,7 @@ curl -o archlinux-bootstrap-2026.03.01-x86_64.tar.zst https://mirrors.ukfast.co.
 
 
 EXTRACT_DIR=$(mktemp -d)
-cd EXTRACT_DIR
+cd $EXTRACT_DIR
 tar xf $PWD/archlinux-bootstrap-x86_64.tar.zst --numeric-owner
 
 sudo mount --bind ./root.x86_64 ./root.x86_64
