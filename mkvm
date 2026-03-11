@@ -8,14 +8,14 @@ pacman -S --needed $INSTALL_EDITORS
 pacman -S --needed arch-install-scripts
 
 
-PWD=$(pwd)
+BEFORE_PWD=$(pwd)
 
 curl -o archlinux-bootstrap-2026.03.01-x86_64.tar.zst https://mirrors.ukfast.co.uk/sites/archlinux.org/iso/2026.03.01/archlinux-bootstrap-2026.03.01-x86_64.tar.zst
 
 
 EXTRACT_DIR=$(mktemp -d)
 cd $EXTRACT_DIR
-tar xf $PWD/archlinux-bootstrap-x86_64.tar.zst --numeric-owner
+tar xf $BEFORE_PWD/archlinux-bootstrap-x86_64.tar.zst --numeric-owner
 
 sudo mount --bind ./root.x86_64 ./root.x86_64
 sudo arch-chroot ./root.x86_64
@@ -69,7 +69,7 @@ sudo passwd
 
 exit
 
-cd $PWD
+cd $BEFORE_PWD
 
 IMG_FILE=root.img
 
