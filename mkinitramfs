@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+mkdir -p initramfs
 cd initramfs
 
 mkdir -p {bin,dev,etc,proc,root,sys,mnt/root}
@@ -36,17 +37,17 @@ mount -t sysfs none /sys
 # utility to parse options from the kernel command line
 cmdline() {
     local value
-    value=" $(cat /proc/cmdline) "
-    value="${value##* ${1}=}"
-    value="${value%% *}"
-    [ "${value}" != "" ] && echo "${value}"
+    value=" \$(cat /proc/cmdline) "
+    value="\${value##* ${1}=}"
+    value="\${value%% *}"
+    [ "\${value}" != "" ] && echo "\${value}"
 }
 
-echo "Command line was set to: $(cat /proc/cmdline)"
+echo "Command line was set to: \$(cat /proc/cmdline)"
 
 echo "Mounting rootfs"
 # we can mount this as readonly since it will be re-mounted using the fstab.
-mount -o ro $(findfs LABEL=root) /mnt/root || rescue_shell
+mount -o ro \$(findfs LABEL=root) /mnt/root || rescue_shell
 
 echo "Umounting /dev, /proc, /sys"
 umount /dev /proc /sys
