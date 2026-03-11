@@ -5,7 +5,7 @@ INSTALL_EDITORS=(neovim nano helix)
 
 
 pacman -S --needed $INSTALL_EDITORS 
-pacman -S --needed arch-install-scripts
+pacman -S --needed arch-install-scripts dosfstools
 
 
 BEFORE_PWD=$(pwd)
