@@ -22,8 +22,8 @@ CHROOT_DIR=$EXTRACT_DIR/root.x86_64
 mount --bind $CHROOT_DIR $CHROOT_DIR
 
 # initialise pacman keyring
-arch-chroot $CHROOT_DIR -- pacman-key --init
-arch-chroot $CHROOT_DIR -- pacman-key --populate
+arch-chroot $CHROOT_DIR pacman-key --init
+arch-chroot $CHROOT_DIR pacman-key --populate
 
 # create pacman mirrors
 
@@ -52,20 +52,20 @@ UseDNS=true
 EOF
 
 
-arch-chroot $CHROOT_DIR -- pacman -S --needed $INSTALL_EDITORS
+arch-chroot $CHROOT_DIR pacman -S --needed $INSTALL_EDITORS
 
 # set the locale, time, hostname
 echo "LANG=en_GB.UTF-8" > $CHROOT_DIR/etc/locale.conf
-arch-chroot $CHROOT_DIR -- locale-gen
+arch-chroot $CHROOT_DIR locale-gen
 
-arch-chroot $CHROOT_DIR -- ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
-arch-chroot $CHROOT_DIR -- hwclock --systohc
+arch-chroot $CHROOT_DIR ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
+arch-chroot $CHROOT_DIR hwclock --systohc
 
 echo duscc > $CHROOT_DIR/etc/hostname
 
 
 echo "Set the root password for the vm"
-arch-chroot $CHROOT_DIR -- passwd
+arch-chroot $CHROOT_DIR passwd
 
 
 
