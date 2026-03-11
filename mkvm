@@ -52,6 +52,7 @@ UseDNS=true
 EOF
 
 
+arch-chroot $CHROOT_DIR pacman -Syu
 arch-chroot $CHROOT_DIR pacman -S --needed $INSTALL_EDITORS
 
 # set the locale, time, hostname
