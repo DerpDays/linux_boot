@@ -3,8 +3,8 @@
 INSTALL_EDITORS=(neovim nano helix)
 
 
-pacman -S $INSTALL_EDITORS
-pacman -S arch-install-scripts
+pacman -S --needed $INSTALL_EDITORS 
+pacman -S --needed arch-install-scripts
 
 
 PWD=$(pwd)
@@ -50,7 +50,7 @@ UseDNS=true
 EOF
 
 
-pacman -S $INSTALL_EDITORS
+pacman -S --needed $INSTALL_EDITORS
 
 # set the locale, time, hostname
 locale-gen
