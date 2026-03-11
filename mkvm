@@ -30,10 +30,10 @@ arch-chroot $CHROOT_DIR pacman-key --populate
 # create pacman mirrors
 
 cat >> $CHROOT_DIR/etc/pacman.d/mirrorlist << EOF
-Server = https://mirrors.ukfast.co.uk/sites/archlinux.org/$repo/os/$arch
-Server = https://www.mirrorservice.org/sites/ftp.archlinux.org/$repo/os/$arch
-Server = https://mirror.server.net/archlinux/$repo/os/$arch
-Server = https://lon.mirror.rackspace.com/archlinux/$repo/os/$arch
+Server = https://mirrors.ukfast.co.uk/sites/archlinux.org/\$repo/os/\$arch
+Server = https://www.mirrorservice.org/sites/ftp.archlinux.org/\$repo/os/\$arch
+Server = https://mirror.server.net/archlinux/\$repo/os/\$arch
+Server = https://lon.mirror.rackspace.com/archlinux/\$repo/os/\$arch
 EOF
 
 # setup networking
