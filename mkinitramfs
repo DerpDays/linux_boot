@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+cd initramfs
+
+mkdir -p {bin,dev,etc,proc,root,sys,mnt/root}
+
+
+# Build coreutils required for the initramfs into a single multicall binary
+# installs to bin/coreutils
+# cargo install coreutils --no-track --root . --no-default-features --features "mknod echo"
+
+BUSYBOX_OUT=$(nix-build ../pkgs/busybox.nix --no-out-link)
+cp -r "$BUSYBOX_OUT/bin" ./
+
+
+
+cat > ./init << EOF
+#!/bin/sh
+
+rescue_shell() {
+    echo "Something went wrong. Dropping you to a shell."
+    exec /bin/sh
+}
+
+
+echo "Mounting devtmpfs, proc, and sysfs"
+# in the kernel we can enable the option to have devtmpfs
+# this is not mandatory, but saves us from having to setup devices ourselves
+# e.g. by copying them from a working system, or using `mknod` etc.
+mount -t devtmpfs none /dev
+
+mount -t proc none /proc
+mount -t sysfs none /sys
+
+
+# utility to parse options from the kernel command line
+cmdline() {
+    local value
+    value=" $(cat /proc/cmdline) "
+    value="${value##* ${1}=}"
+    value="${value%% *}"
+    [ "${value}" != "" ] && echo "${value}"
+}
+
+echo "Command line was set to: $(cat /proc/cmdline)"
+
+echo "Mounting rootfs"
+# we can mount this as readonly since it will be re-mounted using the fstab.
+mount -o ro $(findfs LABEL=root) /mnt/root || rescue_shell
+
+echo "Umounting /dev, /proc, /sys"
+umount /dev /proc /sys
+
+echo "Switching root"
+exec switch_root /mnt/root /sbin/init
+EOF
+
+chmod uag+x ./init
+
+
+
+fd -0 . | cpio --null -ov --format=newc | gzip -9 > ../initramfs.cpio.gz

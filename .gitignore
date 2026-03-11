@@ -1,0 +1,14 @@
+# typst
+/target
+
+/.direnv
+
+# root img & initramfs
+/initramfs
+/initramfs.cpio.gz
+/root.img
+
+# TODO: remove
+/old
+/esp
+/arch_root

@@ -1,0 +1,100 @@
+#!/bin/bash
+
+INSTALL_EDITORS=(neovim nano helix)
+
+
+pacman -S $INSTALL_EDITORS
+pacman -S arch-install-scripts
+
+
+PWD=$(pwd)
+
+curl -o archlinux-bootstrap-2026.03.01-x86_64.tar.zst https://mirrors.ukfast.co.uk/sites/archlinux.org/iso/2026.03.01/archlinux-bootstrap-2026.03.01-x86_64.tar.zst
+
+
+EXTRACT_DIR=$(mktemp -d)
+cd EXTRACT_DIR
+tar xf $PWD/archlinux-bootstrap-x86_64.tar.zst --numeric-owner
+
+sudo mount --bind ./root.x86_64 ./root.x86_64
+sudo arch-chroot ./root.x86_64
+
+# initialise pacman keyring
+sudo pacman-key --init
+sudo pacman-key --populate
+
+# create pacman mirrors
+
+cat >> /etc/pacman.d/mirrorlist << EOF
+Server = https://mirrors.ukfast.co.uk/sites/archlinux.org/$repo/os/$arch
+Server = https://www.mirrorservice.org/sites/ftp.archlinux.org/$repo/os/$arch
+Server = https://mirror.server.net/archlinux/$repo/os/$arch
+Server = https://lon.mirror.rackspace.com/archlinux/$repo/os/$arch
+EOF
+
+# setup networking
+
+cat > /etc/systemd/network/89-ethernet.network << EOF
+[Match]
+Kind=!*
+Type=ether
+
+[Network]
+DHCP=yes
+
+[DHCPv4]
+UseDNS=true
+
+[DHCPv6]
+UseDNS=true
+EOF
+
+
+pacman -S $INSTALL_EDITORS
+
+# set the locale, time, hostname
+locale-gen
+echo "LANG=en_GB.UTF-8" > /etc/locale.conf
+
+ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
+hwclock --systohc
+
+echo duscc > /etc/hostname
+
+
+echo "Set the root password for the vm"
+sudo passwd
+
+
+exit
+
+cd $PWD
+
+IMG_FILE=root.img
+
+dd if=/dev/zero of=$IMG_FILE bs=1M count=4096
+
+echo Please setup the partitions with 1gb EFI, 3gb Linux Root x86_64
+sleep 5
+
+cfdisk $IMG_FILE
+
+IMG_LO=$(sudo losetup --find --show --part-scan root.img)
+
+mkfs.ext4 -L ROOT ${IMG_LO}p2
+mkfs.fat -F 32 -n BOOT ${IMG_LO}p1
+
+# mount boot partition
+sudo mount ${IMG_LO}p2 /mnt
+sudo cp -rp $EXTRACT_DIR/root.x86_64/* /mnt
+
+sudo mkdir -p /mnt/boot
+
+# mount boot partition
+mount ${IMG_LO}p1 /mnt
+
+sudo arch-chroot /mnt
+
+pacman -S linux dracut sudo
+
+exit
