@@ -95,9 +95,9 @@ cp -rp $EXTRACT_DIR/root.x86_64/* /mnt
 mkdir -p /mnt/boot
 
 # mount boot partition
-mount ${IMG_LO}p1 /mnt
+mount ${IMG_LO}p1 /mnt/boot
 
-arch-chroot /mnt -- pacman -S linux dracut sudo
+arch-chroot /mnt pacman -S linux dracut sudo
 
 umount -R /mnt
 
