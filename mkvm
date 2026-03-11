@@ -83,7 +83,7 @@ sleep 5
 
 cfdisk $IMG_FILE
 
-IMG_LO=$(losetup --find --show --part-scan root.img)
+IMG_LO=$(losetup --find --show --partscan root.img)
 
 mkfs.ext4 -L ROOT ${IMG_LO}p2
 mkfs.fat -F 32 -n BOOT ${IMG_LO}p1
