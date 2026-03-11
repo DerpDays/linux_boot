@@ -17,16 +17,17 @@ EXTRACT_DIR=$(mktemp -d)
 cd $EXTRACT_DIR
 tar xf $BEFORE_PWD/archlinux-bootstrap-2026.03.01-x86_64.tar.zst --numeric-owner
 
-sudo mount --bind ./root.x86_64 ./root.x86_64
-sudo arch-chroot ./root.x86_64
+CHROOT_DIR=$EXTRACT_DIR/root.x86_64
+
+mount --bind $CHROOT_DIR $CHROOT_DIR
 
 # initialise pacman keyring
-sudo pacman-key --init
-sudo pacman-key --populate
+arch-chroot $CHROOT_DIR -- pacman-key --init
+arch-chroot $CHROOT_DIR -- pacman-key --populate
 
 # create pacman mirrors
 
-cat >> /etc/pacman.d/mirrorlist << EOF
+cat >> $CHROOT_DIR/etc/pacman.d/mirrorlist << EOF
 Server = https://mirrors.ukfast.co.uk/sites/archlinux.org/$repo/os/$arch
 Server = https://www.mirrorservice.org/sites/ftp.archlinux.org/$repo/os/$arch
 Server = https://mirror.server.net/archlinux/$repo/os/$arch
@@ -35,7 +36,7 @@ EOF
 
 # setup networking
 
-cat > /etc/systemd/network/89-ethernet.network << EOF
+cat > $CHROOT_DIR/etc/systemd/network/89-ethernet.network << EOF
 [Match]
 Kind=!*
 Type=ether
@@ -51,23 +52,22 @@ UseDNS=true
 EOF
 
 
-pacman -S --needed $INSTALL_EDITORS
+arch-chroot $CHROOT_DIR -- pacman -S --needed $INSTALL_EDITORS
 
 # set the locale, time, hostname
-locale-gen
-echo "LANG=en_GB.UTF-8" > /etc/locale.conf
+echo "LANG=en_GB.UTF-8" > $CHROOT_DIR/etc/locale.conf
+arch-chroot $CHROOT_DIR -- locale-gen
 
-ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
-hwclock --systohc
+arch-chroot $CHROOT_DIR -- ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
+arch-chroot $CHROOT_DIR -- hwclock --systohc
 
-echo duscc > /etc/hostname
+echo duscc > $CHROOT_DIR/etc/hostname
 
 
 echo "Set the root password for the vm"
-sudo passwd
+arch-chroot $CHROOT_DIR -- passwd
 
 
-exit
 
 cd $BEFORE_PWD
 
@@ -80,22 +80,25 @@ sleep 5
 
 cfdisk $IMG_FILE
 
-IMG_LO=$(sudo losetup --find --show --part-scan root.img)
+IMG_LO=$(losetup --find --show --part-scan root.img)
 
 mkfs.ext4 -L ROOT ${IMG_LO}p2
 mkfs.fat -F 32 -n BOOT ${IMG_LO}p1
 
 # mount boot partition
-sudo mount ${IMG_LO}p2 /mnt
-sudo cp -rp $EXTRACT_DIR/root.x86_64/* /mnt
+mount ${IMG_LO}p2 /mnt
+cp -rp $EXTRACT_DIR/root.x86_64/* /mnt
 
-sudo mkdir -p /mnt/boot
+mkdir -p /mnt/boot
 
 # mount boot partition
 mount ${IMG_LO}p1 /mnt
 
-sudo arch-chroot /mnt
+arch-chroot /mnt -- pacman -S linux dracut sudo
 
-pacman -S linux dracut sudo
+umount -R /mnt
+
+
+losetup -D
 
 exit
