@@ -10,7 +10,9 @@ pacman -S --needed arch-install-scripts
 
 BEFORE_PWD=$(pwd)
 
-curl -o archlinux-bootstrap-2026.03.01-x86_64.tar.zst https://mirrors.ukfast.co.uk/sites/archlinux.org/iso/2026.03.01/archlinux-bootstrap-2026.03.01-x86_64.tar.zst
+if ! [ -f archlinux-bootstrap-2026.03.01-x86_64.tar.zst ]; then
+  curl -o archlinux-bootstrap-2026.03.01-x86_64.tar.zst https://mirrors.ukfast.co.uk/sites/archlinux.org/iso/2026.03.01/archlinux-bootstrap-2026.03.01-x86_64.tar.zst
+fi
 
 
 EXTRACT_DIR=$(mktemp -d)
