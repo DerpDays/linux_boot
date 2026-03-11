@@ -12,6 +12,15 @@ mount:
 unmount:
   losetup -D
 
+bootloader-copy:
+  mkdir -p /mnt/boot/efi/boot
+  cd uefi-boot && cargo build --target x86_64-unknown-uefi --release && cp target/x86_64-unknown-uefi/release/uefi-boot.efi /mnt/boot/efi/boot/bootx64.efi && sync
+
+initramfs-copy:
+  ./mkinitramfs
+  cp initramfs.cpio.gz /mnt/boot
+  
+
 spawn-boot:
   systemd-vmspawn --network-user-mode -i root.img
 
